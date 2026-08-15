@@ -4,11 +4,11 @@
 
 # AI Medical Chatbot
 
-### Healthcare is a human right. AI makes it free.
+### Rise from the fog.
 
 <br/>
 
-[![Try MedOS Free](https://img.shields.io/badge/%F0%9F%8F%A5%20Try%20MedOS-Free%20for%20Everyone-0078D4?style=for-the-badge&logo=huggingface&logoColor=white)](https://huggingface.co/spaces/ruslanmv/MediBot)
+[![Try MedOS Free](https://img.shields.io/badge/%F0%9F%8F%A5%20Try%20MedOS-Free%20for%20Everyone-0078D4?style=for-the-badge&logo=huggingface&logoColor=white)](https://huggingface.co/spaces/ruslanmv/RedRise)
 &nbsp;&nbsp;
 [![GitHub Stars](https://img.shields.io/github/stars/ruslanmv/ai-medical-chatbot?style=for-the-badge&logo=github&label=Star&color=gold)](https://github.com/ruslanmv/ai-medical-chatbot)
 
@@ -18,11 +18,11 @@
 
 <br/>
 
-[Use it now](https://huggingface.co/spaces/ruslanmv/MediBot) &nbsp;&bull;&nbsp; [What you get](#-what-you-get) &nbsp;&bull;&nbsp; [The stack](#-the-open-source-stack) &nbsp;&bull;&nbsp; [Run it yourself](#-run-it-yourself) &nbsp;&bull;&nbsp; [Join us](#-contributing) &nbsp;&bull;&nbsp; [Sponsor](#support-the-project)
+[Use it now](https://huggingface.co/spaces/ruslanmv/RedRise) &nbsp;&bull;&nbsp; [What you get](#-what-you-get) &nbsp;&bull;&nbsp; [The stack](#-the-open-source-stack) &nbsp;&bull;&nbsp; [Run it yourself](#-run-it-yourself) &nbsp;&bull;&nbsp; [Join us](#-contributing) &nbsp;&bull;&nbsp; [Sponsor](#support-the-project)
 
 <br/>
 
-<a href="https://huggingface.co/spaces/ruslanmv/MediBot">
+<a href="https://huggingface.co/spaces/ruslanmv/RedRise">
 <img src="assets/images/posts/README/future.jpg" alt="Free Doctor Consultation with Artificial Intelligence" width="100%" />
 </a>
 
@@ -31,7 +31,7 @@
 <p align="center">
   <a href="https://github.com/sponsors/ruslanmv"><img src="https://img.shields.io/badge/%F0%9F%92%96%20Become%20a%20sponsor-ec4899?style=for-the-badge" alt="Become a sponsor"/></a>
   &nbsp;
-  <a href="https://huggingface.co/spaces/ruslanmv/MediBot"><img src="https://img.shields.io/badge/Try%20it%20now%20%E2%86%92%20MediBot-2e5bff?style=for-the-badge" alt="Try MediBot"/></a>
+  <a href="https://huggingface.co/spaces/ruslanmv/RedRise"><img src="https://img.shields.io/badge/Try%20it%20now%20%E2%86%92%20RedRise-2e5bff?style=for-the-badge" alt="Try RedRise"/></a>
 </p>
 
 <p align="center"><sub>This project is free, open source, and runs on free-tier infrastructure. If MedOS is useful to you, <a href="https://github.com/sponsors/ruslanmv">sponsor on GitHub</a> — every dollar helps keep healthcare guidance free for everyone, in every language.</sub></p>
@@ -61,7 +61,7 @@ If that mission resonates, you can keep it going: [**sponsor on GitHub →**](ht
 The full medical AI experience — chat with the AI, track your health, manage medications, and more.
 
 <div align="center">
-<a href="https://huggingface.co/spaces/ruslanmv/MediBot">
+<a href="https://huggingface.co/spaces/ruslanmv/RedRise">
 <img src="assets/2025-12-29-02-45-35.png" alt="MedOS Chat with AI Doctor" width="700" />
 </a>
 </div>
@@ -82,7 +82,7 @@ The full medical AI experience — chat with the AI, track your health, manage m
 Your personal health dashboard — private, encrypted, on your device.
 
 <div align="center">
-<a href="https://huggingface.co/spaces/ruslanmv/MediBot">
+<a href="https://huggingface.co/spaces/ruslanmv/RedRise">
 <img src="assets/2025-12-29-02-47-19.png" alt="MedOS Health Tracker — Schedule & Routine" width="700" />
 </a>
 </div>
@@ -125,7 +125,7 @@ Everything here is free and open. Every piece can be run independently, improved
 
 <div align="center">
 
-<a href="https://huggingface.co/spaces/ruslanmv/MediBot">
+<a href="https://huggingface.co/spaces/ruslanmv/RedRise">
 <img src="assets/2025-12-29-02-45-35.png" alt="MedOS" width="700" />
 <br/>
 <img src="https://img.shields.io/badge/MedOS-Web%20App-0078D4?style=for-the-badge&logo=nextdotjs&logoColor=white" alt="MedOS Web App" />
@@ -195,7 +195,7 @@ Point your camera at a medicine box — AI reads the label for you
 
 | # | Project | What it does | Links |
 |---|---|---|---|
-| | **[MedOS Web App](./web/)** | Full medical platform — chat, health tracker, medicine inventory, 13 languages | [![Live](https://img.shields.io/badge/Live-HuggingFace-yellow?logo=huggingface)](https://huggingface.co/spaces/ruslanmv/MediBot) |
+| | **[MedOS Web App](./web/)** | Full medical platform — chat, health tracker, medicine inventory, 13 languages | [![Live](https://img.shields.io/badge/Live-HuggingFace-yellow?logo=huggingface)](https://huggingface.co/spaces/ruslanmv/RedRise) |
 | | **[MedOS Backend](./9-HuggingFace-Global/)** | API server — auth, SQLite DB, LLM routing, emergency triage, RAG | [![Code](https://img.shields.io/badge/Code-blue?logo=github)](./9-HuggingFace-Global/) |
 | 11 | **[Medicine Scanner](./11-Medicine-Scanner/)** | Camera scan of medicine labels via Qwen2.5-VL multimodal AI | [![Code](https://img.shields.io/badge/Code-blue?logo=github)](./11-Medicine-Scanner/) |
 | 12 | **[MetaEngine Nearby](./12-MetaEngine-Nearby/)** | Find nearby pharmacies and doctors via OpenStreetMap | [![Code](https://img.shields.io/badge/Code-blue?logo=github)](./12-MetaEngine-Nearby/) |
@@ -211,7 +211,7 @@ Point your camera at a medicine box — AI reads the label for you
 | | **[Empathy Chatbot](https://github.com/energycombined/empathyondemand)** | AI understanding emotions and unmet needs (Tilburg University) | [![Live](https://img.shields.io/badge/Live-HuggingFace-yellow?logo=huggingface)](https://huggingface.co/spaces/ruslanmv/Empathy_Chatbot_v1) |
 | | **[WatsonX MCP Server](https://github.com/ruslanmv/watsonx-medical-mcp-server)** | IBM WatsonX medical symptom analysis via MCP protocol | [![Code](https://img.shields.io/badge/Code-blue?logo=github)](https://github.com/ruslanmv/watsonx-medical-mcp-server) |
 | | **[RAG Pipeline](./3-Modeling/)** | Medical knowledge retrieval with FAISS / Milvus / ChromaDB | [![Code](https://img.shields.io/badge/Code-blue?logo=github)](./3-Modeling/) |
-| | **[Medical Dataset](./2-Data/)** | 250K curated medical Q&A pairs for training | [![Code](https://img.shields.io/badge/Code-blue?logo=github)](./2-Data/) |
+| | **[Medical Dataset](./2-Data/)** | 250K curated medical Q&A pairs for training | [![Model](https://img.shields.io/badge/Code-blue?logo=github)](./2-Data/) |
 | | **[Fine-tuning](./6-FineTunning/)** | Notebooks to fine-tune your own medical LLMs | [![Code](https://img.shields.io/badge/Code-blue?logo=github)](./6-FineTunning/) |
 
 ---
@@ -255,7 +255,7 @@ Every Ecosystem module follows the same contract: **additive only, namespaced, f
 
 ### Use it now (zero install)
 
-[![Open MedOS](https://img.shields.io/badge/%F0%9F%8F%A5%20Open-MedOS-0078D4?style=for-the-badge)](https://huggingface.co/spaces/ruslanmv/MediBot)
+[![Open MedOS](https://img.shields.io/badge/%F0%9F%8F%A5%20Open-MedOS-0078D4?style=for-the-badge)](https://huggingface.co/spaces/ruslanmv/RedRise)
 
 Just click. No account. No install. Free.
 
