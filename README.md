@@ -211,7 +211,7 @@ Point your camera at a medicine box — AI reads the label for you
 | | **[Empathy Chatbot](https://github.com/energycombined/empathyondemand)** | AI understanding emotions and unmet needs (Tilburg University) | [![Live](https://img.shields.io/badge/Live-HuggingFace-yellow?logo=huggingface)](https://huggingface.co/spaces/ruslanmv/Empathy_Chatbot_v1) |
 | | **[WatsonX MCP Server](https://github.com/ruslanmv/watsonx-medical-mcp-server)** | IBM WatsonX medical symptom analysis via MCP protocol | [![Code](https://img.shields.io/badge/Code-blue?logo=github)](https://github.com/ruslanmv/watsonx-medical-mcp-server) |
 | | **[RAG Pipeline](./3-Modeling/)** | Medical knowledge retrieval with FAISS / Milvus / ChromaDB | [![Code](https://img.shields.io/badge/Code-blue?logo=github)](./3-Modeling/) |
-| | **[Medical Dataset](./2-Data/)** | 250K curated medical Q&A pairs for training | [![Model](https://img.shields.io/badge/Code-blue?logo=github)](./2-Data/) |
+| | **[Medical Dataset](./2-Data/)** | 250K curated medical Q&A pairs for training | [![Code](https://img.shields.io/badge/Code-blue?logo=github)](./2-Data/) |
 | | **[Fine-tuning](./6-FineTunning/)** | Notebooks to fine-tune your own medical LLMs | [![Code](https://img.shields.io/badge/Code-blue?logo=github)](./6-FineTunning/) |
 
 ---
@@ -229,7 +229,7 @@ The MedOS ecosystem is layered. The **Core** is what runs in production today �
 | Layer | Module | What it adds |
 |---|---|---|
 | Core | **MedOS Web App** | The medical platform users see today — chat, vitals, medicines, records, 13 languages. |
-| Core | **MedOS Backend** | Next.js API + SQLite + LLM routing + medical RAG + emergency triage. |
+| Core | **MedOS Backend** | Next.js API + SQLite DB + LLM routing + medical RAG + emergency triage. |
 | Core | **Health Tracker** | Vitals, medicines, appointments, records, EHR wizard, JSON / print export. |
 | Core | **Medicine Scanner** | Camera → structured JSON via Qwen2.5-VL. |
 | Core | **Nearby Care** | Pharmacies and doctors via OpenStreetMap with ranking and route metadata. |
