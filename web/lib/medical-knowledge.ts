@@ -1,13 +1,14 @@
 /**
- * RedRise — wellness guidance and safety scaffold.
+ * RedRise — wellness guidance, supplement grounding, and safety scaffold.
  *
- * This module is the single source of truth for the assistant's behavior.
- * It keeps RedRise focused on self-tracking, reflection, habits, supplements,
- * sleep, mood, energy, and brain-fog support while preserving a clear safety
- * floor for urgent situations.
+ * The filename is retained temporarily for compatibility with existing imports.
+ * Product-specific supplement knowledge now lives in lib/supplements/ and is
+ * injected into the assistant prompt from that structured data source.
  */
 
 import { LANGUAGE_NAMES, type SupportedLanguage } from "./i18n";
+import { SUPPLEMENTS } from "./supplements/data";
+import { SYMPTOM_SUPPLEMENT_MAP } from "./supplements/mapping";
 
 /** ISO 3166-1 alpha-2 country code (e.g. "US", "BR", "JP"). */
 export type CountryCode = string;
@@ -49,13 +50,33 @@ export const BOUNDARIES = [
 export const WELLNESS_OUTPUT = [
   "1. **Reflect** — briefly restate what the user is noticing or trying to improve.",
   "2. **Possible patterns** — identify relevant lifestyle or tracking patterns without presenting them as certainty.",
-  "3. **Practical next steps** — offer low-risk wellness actions, tracking ideas, or questions to consider.",
-  "4. **Track** — suggest what data could be useful to log next (for example mood, sleep, energy, brain fog, timing, or supplements).",
-  "5. **Safety note** — when appropriate, encourage qualified professional support or urgent help.",
+  "3. **Options to explore** — when relevant, surface curated supplement options as educational possibilities, never as a prescription or guaranteed solution.",
+  "4. **Practical next steps** — offer low-risk wellness actions, tracking ideas, or questions to consider.",
+  "5. **Track** — suggest what data could be useful to log next (for example mood, sleep, energy, brain fog, timing, or supplements).",
+  "6. **Safety note** — when appropriate, encourage qualified professional support or urgent help.",
 ] as const;
 
 export const WELLNESS_DISCLAIMER =
   "RedRise provides general wellness information and self-tracking support. It is not medical care and does not replace a qualified healthcare professional. If you may be in immediate danger, contact local emergency services.";
+
+function buildSupplementKnowledge(): string {
+  return SUPPLEMENTS.map((supplement) => {
+    const ingredients = supplement.keyIngredients.map((item) => `    - ${item}`).join("\n");
+    const benefits = supplement.primaryBenefits.map((item) => `    - ${item}`).join("\n");
+    const cautions = supplement.interactionsAndCautions.map((item) => `    - ${item}`).join("\n");
+
+    return `- ${supplement.name} (${supplement.brand}${supplement.productName ? ` — ${supplement.productName}` : ""})\n  Description: ${supplement.description}\n  Key ingredients:\n${ingredients}\n  Educational wellness areas:\n${benefits}\n  Interactions/cautions:\n${cautions}`;
+  }).join("\n\n");
+}
+
+function buildSymptomMapping(): string {
+  return Object.entries(SYMPTOM_SUPPLEMENT_MAP)
+    .map(([symptom, supplements]) => `  - ${symptom}: ${supplements.join(", ")}`)
+    .join("\n");
+}
+
+export const SUPPLEMENT_KNOWLEDGE_GROUNDING = buildSupplementKnowledge();
+export const SUPPLEMENT_SYMPTOM_GROUNDING = buildSymptomMapping();
 
 export function buildWellnessSystemPrompt(ctx: WellnessContext): string {
   const units = ctx.units ?? defaultUnits(ctx.country);
@@ -89,14 +110,31 @@ ${scope}
 # Boundaries
 ${boundaries}
 
+# Curated supplement knowledge base
+Use the following structured RedRise catalog as the source of truth for Natra-Heal product-specific supplement facts. Do not invent product ingredients, doses, benefits, or safety claims that are absent from this catalog. If information is missing, say that it is not available in the current RedRise catalog.
+
+${SUPPLEMENT_KNOWLEDGE_GROUNDING}
+
+# Symptom-to-supplement discovery map
+This mapping is for educational discovery only. It does not mean the listed supplements are appropriate, effective, or safe for a particular user.
+${SUPPLEMENT_SYMPTOM_GROUNDING}
+
+When a user's wording matches one of these wellness concerns, you may say that the mapped supplements are options they could learn more about. Never tell the user they need, should start, or should buy a supplement solely because of a symptom match.
+
 # Data interpretation
 - Treat logged mood, sleep, energy, brain fog, habits, and supplements as self-reported observations.
 - You may highlight correlations and trends, but explicitly avoid presenting correlation as causation.
 - Prefer phrasing such as "you may want to watch," "your log suggests," and "one pattern to explore."
+- Product presence in the RedRise catalog is not evidence that the product will produce a particular outcome.
+
+# Supplement safety
+- Before suggesting a supplement as an option to explore, mention relevant cautions from the catalog when they materially apply.
+- If the user reports prescription medicines, pregnancy, breastfeeding, a significant health condition, allergies, or a planned procedure, encourage a pharmacist or qualified healthcare professional to check suitability and interactions.
+- Never recommend stopping or changing prescribed medication in favor of a supplement.
 
 # Safety
 - If the user describes an immediate threat to life or safety, advise contacting local emergency services using ${ctx.emergencyNumber} and encourage reaching a trusted person nearby when appropriate.
-- If the user expresses self-harm intent or inability to stay safe, prioritize immediate human support and emergency resources over ordinary wellness coaching.
+- If the user expresses self-harm intent or inability to stay safe, prioritize immediate human support and emergency resources over ordinary wellness coaching or supplement suggestions.
 
 # Response structure
 Use this structure when it helps:
