@@ -11,14 +11,18 @@ import {
 
 export type TextSize = "small" | "medium" | "large";
 
+/** RedRise uses the cellphone emergency number as the ZA primary route.
+ *  10177 remains an ambulance/landline fallback in crisis UI copy. */
+function primaryEmergencyNumber(country: string): string {
+  return country.toUpperCase() === "ZA" ? "112" : getEmergencyNumber(country);
+}
+
 export function useSettings() {
   const [preset, setPreset] = useState<Preset>("free-best");
   const [provider, setProvider] = useState<Provider>("hf");
   const [apiKey, setApiKey] = useState("");
   const [hfToken, setHfToken] = useState("");
   const [isLoaded, setIsLoaded] = useState(false);
-
-  // New patient-friendly settings
   const [advancedMode, setAdvancedMode] = useState(false);
   const [language, setLanguage] = useState<SupportedLanguage>("en");
   const [country, setCountry] = useState("US");
@@ -29,11 +33,8 @@ export function useSettings() {
   const [darkMode, setDarkMode] = useState(false);
   const [welcomeCompleted, setWelcomeCompleted] = useState(false);
   const [emergencyNumber, setEmergencyNumber] = useState("112");
-  // True once the user picks a language/country manually — blocks any
-  // subsequent IP-based auto-detect from overriding their choice.
   const [explicitLanguage, setExplicitLanguage] = useState(false);
 
-  // Load from localStorage on mount
   useEffect(() => {
     const savedPreset = localStorage.getItem("medos_preset") as Preset;
     const savedProvider = localStorage.getItem("medos_provider") as Provider;
@@ -56,191 +57,71 @@ export function useSettings() {
     if (savedApiKey) setApiKey(savedApiKey);
     if (savedHfToken) setHfToken(savedHfToken);
     if (savedAdvanced) setAdvancedMode(savedAdvanced === "true");
-    if (savedLanguage) {
-      setLanguage(savedLanguage);
-    } else {
-      // Auto-detect language on first load
-      const detected = detectLanguage();
-      setLanguage(detected);
-    }
-    if (savedCountry) {
-      setCountry(savedCountry);
-    } else {
-      const detected = detectCountry();
-      setCountry(detected);
-    }
+    setLanguage(savedLanguage || detectLanguage());
+    const resolvedCountry = savedCountry || detectCountry();
+    setCountry(resolvedCountry);
     if (savedVoice !== null) setVoiceEnabled(savedVoice === "true");
     if (savedReadAloud !== null) setReadAloud(savedReadAloud === "true");
     if (savedTextSize) setTextSize(savedTextSize);
     if (savedSimple !== null) setSimpleLanguage(savedSimple === "true");
     if (savedDark !== null) setDarkMode(savedDark === "true");
     if (savedWelcome) setWelcomeCompleted(savedWelcome === "true");
-    if (savedEmergency) {
-      setEmergencyNumber(savedEmergency);
-    } else {
-      const detectedCountry = savedCountry || detectCountry();
-      setEmergencyNumber(getEmergencyNumber(detectedCountry));
-    }
-    if (savedExplicit !== null) setExplicitLanguage(savedExplicit === "true");
 
+    // Override any legacy ZA value (including a previously cached 10177).
+    const resolvedEmergency = resolvedCountry.toUpperCase() === "ZA"
+      ? "112"
+      : savedEmergency || primaryEmergencyNumber(resolvedCountry);
+    setEmergencyNumber(resolvedEmergency);
+    localStorage.setItem("medos_emergency_number", resolvedEmergency);
+
+    if (savedExplicit !== null) setExplicitLanguage(savedExplicit === "true");
     setIsLoaded(true);
   }, []);
 
-  // Save all settings to localStorage when they change
+  useEffect(() => { if (isLoaded) localStorage.setItem("medos_preset", preset); }, [preset, isLoaded]);
+  useEffect(() => { if (isLoaded) localStorage.setItem("medos_provider", provider); }, [provider, isLoaded]);
+  useEffect(() => { if (isLoaded) localStorage.setItem("medos_api_key", apiKey); }, [apiKey, isLoaded]);
   useEffect(() => {
     if (!isLoaded) return;
-    localStorage.setItem("medos_preset", preset);
-  }, [preset, isLoaded]);
-
-  useEffect(() => {
-    if (!isLoaded) return;
-    localStorage.setItem("medos_provider", provider);
-  }, [provider, isLoaded]);
-
-  useEffect(() => {
-    if (!isLoaded) return;
-    localStorage.setItem("medos_api_key", apiKey);
-  }, [apiKey, isLoaded]);
-
-  useEffect(() => {
-    if (!isLoaded) return;
-    if (hfToken) {
-      localStorage.setItem("medos_hf_token", hfToken);
-    } else {
-      localStorage.removeItem("medos_hf_token");
-    }
+    if (hfToken) localStorage.setItem("medos_hf_token", hfToken);
+    else localStorage.removeItem("medos_hf_token");
   }, [hfToken, isLoaded]);
-
-  useEffect(() => {
-    if (!isLoaded) return;
-    localStorage.setItem("medos_advanced_mode", String(advancedMode));
-  }, [advancedMode, isLoaded]);
-
-  useEffect(() => {
-    if (!isLoaded) return;
-    localStorage.setItem("medos_language", language);
-  }, [language, isLoaded]);
-
+  useEffect(() => { if (isLoaded) localStorage.setItem("medos_advanced_mode", String(advancedMode)); }, [advancedMode, isLoaded]);
+  useEffect(() => { if (isLoaded) localStorage.setItem("medos_language", language); }, [language, isLoaded]);
   useEffect(() => {
     if (!isLoaded) return;
     localStorage.setItem("medos_country", country);
-    const num = getEmergencyNumber(country);
+    const num = primaryEmergencyNumber(country);
     setEmergencyNumber(num);
     localStorage.setItem("medos_emergency_number", num);
   }, [country, isLoaded]);
+  useEffect(() => { if (isLoaded) localStorage.setItem("medos_voice", String(voiceEnabled)); }, [voiceEnabled, isLoaded]);
+  useEffect(() => { if (isLoaded) localStorage.setItem("medos_read_aloud", String(readAloud)); }, [readAloud, isLoaded]);
+  useEffect(() => { if (isLoaded) localStorage.setItem("medos_text_size", textSize); }, [textSize, isLoaded]);
+  useEffect(() => { if (isLoaded) localStorage.setItem("medos_simple_language", String(simpleLanguage)); }, [simpleLanguage, isLoaded]);
+  useEffect(() => { if (isLoaded) localStorage.setItem("medos_dark_mode", String(darkMode)); }, [darkMode, isLoaded]);
+  useEffect(() => { if (isLoaded) localStorage.setItem("medos_welcome_completed", String(welcomeCompleted)); }, [welcomeCompleted, isLoaded]);
+  useEffect(() => { if (isLoaded) localStorage.setItem("medos_explicit_language", String(explicitLanguage)); }, [explicitLanguage, isLoaded]);
 
-  useEffect(() => {
-    if (!isLoaded) return;
-    localStorage.setItem("medos_voice", String(voiceEnabled));
-  }, [voiceEnabled, isLoaded]);
+  const setLanguageExplicit = (lang: SupportedLanguage) => { setLanguage(lang); setExplicitLanguage(true); };
+  const setCountryExplicit = (c: string) => { setCountry(c); setExplicitLanguage(true); };
 
-  useEffect(() => {
-    if (!isLoaded) return;
-    localStorage.setItem("medos_read_aloud", String(readAloud));
-  }, [readAloud, isLoaded]);
-
-  useEffect(() => {
-    if (!isLoaded) return;
-    localStorage.setItem("medos_text_size", textSize);
-  }, [textSize, isLoaded]);
-
-  useEffect(() => {
-    if (!isLoaded) return;
-    localStorage.setItem("medos_simple_language", String(simpleLanguage));
-  }, [simpleLanguage, isLoaded]);
-
-  useEffect(() => {
-    if (!isLoaded) return;
-    localStorage.setItem("medos_dark_mode", String(darkMode));
-  }, [darkMode, isLoaded]);
-
-  useEffect(() => {
-    if (!isLoaded) return;
-    localStorage.setItem("medos_welcome_completed", String(welcomeCompleted));
-  }, [welcomeCompleted, isLoaded]);
-
-  useEffect(() => {
-    if (!isLoaded) return;
-    localStorage.setItem("medos_explicit_language", String(explicitLanguage));
-  }, [explicitLanguage, isLoaded]);
-
-  /**
-   * Wrap setLanguage so a manual pick also flips the "user chose" flag,
-   * which in turn prevents IP geo-detection from overriding the choice.
-   */
-  const setLanguageExplicit = (lang: SupportedLanguage) => {
-    setLanguage(lang);
-    setExplicitLanguage(true);
-  };
-
-  const setCountryExplicit = (c: string) => {
-    setCountry(c);
-    setExplicitLanguage(true);
-  };
-
-  /**
-   * Applied by useGeoDetect. Only called when explicitLanguage === false,
-   * so it never clobbers a manual choice.
-   */
-  const applyGeo = (g: {
-    country: string;
-    language: SupportedLanguage;
-    emergencyNumber: string;
-  }) => {
+  const applyGeo = (g: { country: string; language: SupportedLanguage; emergencyNumber: string }) => {
     if (explicitLanguage) return;
     setCountry(g.country);
     setLanguage(g.language);
-    setEmergencyNumber(g.emergencyNumber);
+    setEmergencyNumber(primaryEmergencyNumber(g.country));
   };
 
-  const clearApiKey = () => {
-    setApiKey("");
-    localStorage.removeItem("medos_api_key");
-  };
-
-  const clearHfToken = () => {
-    setHfToken("");
-    localStorage.removeItem("medos_hf_token");
-  };
+  const clearApiKey = () => { setApiKey(""); localStorage.removeItem("medos_api_key"); };
+  const clearHfToken = () => { setHfToken(""); localStorage.removeItem("medos_hf_token"); };
 
   return {
-    // Original
-    preset,
-    setPreset,
-    provider,
-    setProvider,
-    apiKey,
-    setApiKey,
-    clearApiKey,
-    hfToken,
-    setHfToken,
-    clearHfToken,
-    isLoaded,
-    // Geo / language explicit-override plumbing
-    explicitLanguage,
-    setLanguageExplicit,
-    setCountryExplicit,
-    applyGeo,
-    // New patient-friendly settings
-    advancedMode,
-    setAdvancedMode,
-    language,
-    setLanguage,
-    country,
-    setCountry,
-    voiceEnabled,
-    setVoiceEnabled,
-    readAloud,
-    setReadAloud,
-    textSize,
-    setTextSize,
-    simpleLanguage,
-    setSimpleLanguage,
-    darkMode,
-    setDarkMode,
-    welcomeCompleted,
-    setWelcomeCompleted,
-    emergencyNumber,
-    setEmergencyNumber,
+    preset, setPreset, provider, setProvider, apiKey, setApiKey, clearApiKey,
+    hfToken, setHfToken, clearHfToken, isLoaded, explicitLanguage,
+    setLanguageExplicit, setCountryExplicit, applyGeo, advancedMode, setAdvancedMode,
+    language, setLanguage, country, setCountry, voiceEnabled, setVoiceEnabled,
+    readAloud, setReadAloud, textSize, setTextSize, simpleLanguage, setSimpleLanguage,
+    darkMode, setDarkMode, welcomeCompleted, setWelcomeCompleted, emergencyNumber, setEmergencyNumber,
   };
 }
