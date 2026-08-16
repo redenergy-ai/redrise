@@ -2,10 +2,7 @@
 
 import { useMemo } from "react";
 import { HeroInput } from "../chat/HeroInput";
-import {
-  t,
-  type SupportedLanguage,
-} from "@/lib/i18n";
+import { type SupportedLanguage } from "@/lib/i18n";
 import { getExampleQuestions, pickRandom } from "@/lib/example-questions";
 
 interface HomeViewProps {
@@ -17,29 +14,14 @@ interface HomeViewProps {
   onStartVoice: () => void;
 }
 
-/**
- * Home landing — chat-first, enterprise-clean, zero noise.
- *
- * Structure (ChatGPT / Ada Health pattern):
- *   1. Empathetic headline (one line)
- *   2. Subtitle (one line)
- *   3. The input (THE hero element)
- *   4. Suggestion chips
- *   5. One-line disclaimer (subtle)
- *
- * NO trust badges, NO action cards, NO marketing copy.
- * Trust is communicated through design quality, not text.
- */
+const WELLNESS_DISCLAIMER =
+  "RedRise provides general wellness information and self-tracking support. It is not medical care and does not replace a qualified healthcare professional.";
+
 export function HomeView({
   language,
   onSendMessage,
   onStartVoice,
 }: HomeViewProps) {
-  // Pick three suggestions at random from the localized bank. Memoized
-  // on `language` so the chips stay stable while the user is on the
-  // home view; switching language (or remounting after "New chat")
-  // reshuffles them. This is what makes the home feel alive instead
-  // of the same three example chips on every visit.
   const suggestions = useMemo(
     () => pickRandom(getExampleQuestions(language), 3),
     [language],
@@ -48,17 +30,21 @@ export function HomeView({
   return (
     <div className="flex-1 overflow-y-auto scroll-touch flex flex-col">
       <div className="flex-1 flex flex-col justify-center max-w-2xl mx-auto w-full px-4 sm:px-6 py-8">
-        {/* Hero — short, empathetic, centered */}
         <div className="text-center mb-8">
-          <h1 className="text-2xl sm:text-3xl font-bold text-ink-base tracking-tight leading-tight mb-2">
-            {t("home_hero_title", language)}
+          <p className="text-xs sm:text-sm font-semibold uppercase tracking-[0.18em] text-brand-600 dark:text-brand-400 mb-3">
+            RedRise wellness companion
+          </p>
+          <h1 className="text-3xl sm:text-4xl font-bold text-ink-base tracking-tight leading-tight mb-3">
+            Rise from the fog.
           </h1>
-          <p className="text-ink-muted text-sm sm:text-base leading-relaxed max-w-sm mx-auto">
-            {t("home_hero_subtitle", language)}
+          <p className="text-lg sm:text-xl font-semibold text-ink-base leading-relaxed max-w-xl mx-auto mb-3">
+            Give your body the fuel it needs to heal itself.
+          </p>
+          <p className="text-ink-muted text-sm sm:text-base leading-relaxed max-w-lg mx-auto">
+            Track mood, brain fog, energy, sleep, supplements, and daily habits. Notice patterns and build routines that support your wellbeing.
           </p>
         </div>
 
-        {/* The input — THE hero */}
         <div className="mb-6">
           <HeroInput
             language={language}
@@ -69,9 +55,8 @@ export function HomeView({
           />
         </div>
 
-        {/* One subtle line — not a banner, not a wall of text */}
-        <p className="text-center text-[11px] text-ink-subtle">
-          {t("badge_not_doctor", language)}
+        <p className="text-center text-[11px] text-ink-subtle leading-relaxed max-w-xl mx-auto">
+          {WELLNESS_DISCLAIMER}
         </p>
       </div>
     </div>
