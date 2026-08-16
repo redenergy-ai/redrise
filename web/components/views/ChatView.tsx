@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useRef, useEffect, useState } from "react";
-import { X, Sparkles, CheckCircle2 } from "lucide-react";
+import { X, Sparkles, CheckCircle2, Leaf } from "lucide-react";
 import { MessageBubble } from "../chat/MessageBubble";
 import { HeroInput } from "../chat/HeroInput";
 import { TypingIndicator } from "../chat/TypingIndicator";
@@ -11,6 +11,10 @@ import type { EHRProfile } from "@/lib/health-store";
 import type { ValidatorContext } from "@/lib/medical-flow/validator";
 import { t, type SupportedLanguage } from "@/lib/i18n";
 import { getExampleQuestions, pickRandom } from "@/lib/example-questions";
+import {
+  getSupplementSuggestionsForText,
+  type SupplementSuggestionMatch,
+} from "@/lib/supplements/mapping";
 
 interface ChatViewProps {
   messages: ChatMessage[];
@@ -100,6 +104,18 @@ export function ChatView({
     return pickRandom(getExampleQuestions(language), 3);
   }, [hasMessages, language]);
 
+  const latestUserMessage = useMemo(() => {
+    for (let index = messages.length - 1; index >= 0; index -= 1) {
+      if (messages[index].role === "user") return messages[index].content;
+    }
+    return "";
+  }, [messages]);
+
+  const supplementMatches = useMemo(
+    () => getSupplementSuggestionsForText(latestUserMessage),
+    [latestUserMessage],
+  );
+
   return (
     <>
       <div className="flex-1 overflow-y-auto scroll-smooth scroll-touch">
@@ -145,6 +161,10 @@ export function ChatView({
             />
           ))}
 
+          {supplementMatches.length > 0 && (
+            <SupplementSuggestions matches={supplementMatches} />
+          )}
+
           {isTyping && <TypingIndicator label={t("ai_analyzing", language)} />}
 
           <div ref={chatEndRef} />
@@ -178,6 +198,49 @@ export function ChatView({
         </div>
       </div>
     </>
+  );
+}
+
+function SupplementSuggestions({ matches }: { matches: SupplementSuggestionMatch[] }) {
+  const supplements = useMemo(() => {
+    const seen = new Set<string>();
+    return matches.flatMap((match) => match.supplements).filter((supplement) => {
+      if (seen.has(supplement.id)) return false;
+      seen.add(supplement.id);
+      return true;
+    });
+  }, [matches]);
+
+  return (
+    <div className="mt-5 rounded-2xl border border-brand-500/20 bg-brand-500/5 p-4 sm:p-5 animate-in fade-in slide-in-from-bottom-2 duration-300">
+      <div className="flex items-start gap-3">
+        <div className="flex-shrink-0 w-9 h-9 rounded-full bg-brand-500/10 flex items-center justify-center">
+          <Leaf size={18} className="text-brand-600 dark:text-brand-400" />
+        </div>
+        <div className="flex-1 min-w-0">
+          <p className="font-semibold text-ink-base text-sm">Supplement options to explore</p>
+          <p className="mt-1 text-xs text-ink-muted leading-relaxed">
+            Based on your mention of {matches.map((match) => match.symptom).join(", ")}, these are educational matches from the RedRise supplement catalog.
+          </p>
+          <div className="mt-3 grid gap-2">
+            {supplements.map((supplement) => (
+              <div key={supplement.id} className="rounded-xl bg-surface-0/80 border border-surface-3 p-3">
+                <div className="flex items-center justify-between gap-3">
+                  <p className="text-sm font-semibold text-ink-base">{supplement.name}</p>
+                  <span className="text-[10px] uppercase tracking-wide text-ink-subtle">{supplement.brand}</span>
+                </div>
+                <p className="mt-1 text-xs text-ink-muted leading-relaxed">
+                  {supplement.primaryBenefits.slice(0, 2).join(" · ")}
+                </p>
+              </div>
+            ))}
+          </div>
+          <p className="mt-3 text-[11px] text-ink-subtle leading-relaxed">
+            Educational discovery only — not a recommendation to start or buy a supplement. Check interactions, allergies, pregnancy/breastfeeding considerations, and suitability with a pharmacist or qualified healthcare professional when relevant.
+          </p>
+        </div>
+      </div>
+    </div>
   );
 }
 
