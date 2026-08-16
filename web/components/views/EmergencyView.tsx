@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { AlertTriangle, HeartHandshake, Phone, ShieldAlert } from "lucide-react";
 import type { SupportedLanguage } from "@/lib/i18n";
 
@@ -9,8 +10,13 @@ interface EmergencyViewProps {
 }
 
 export function EmergencyView({ emergencyNumber }: EmergencyViewProps) {
-  const primary = emergencyNumber === "10177" ? "112" : emergencyNumber;
-  const isSouthAfrica = primary === "112";
+  const [country, setCountry] = useState("");
+  useEffect(() => {
+    setCountry(window.localStorage.getItem("medos_country") || "");
+  }, []);
+
+  const isSouthAfrica = country.toUpperCase() === "ZA";
+  const primary = isSouthAfrica ? "112" : emergencyNumber;
 
   return (
     <div className="flex-1 overflow-y-auto p-6 pb-mobile-nav scroll-touch">
