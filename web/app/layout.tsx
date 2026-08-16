@@ -8,29 +8,23 @@ const inter = Inter({
   variable: "--font-sans",
 });
 
-// Canonical site URL. NEXT_PUBLIC_SITE_URL lets us override per env
-// (preview deployments, staging). Falls back to the production domain.
 const SITE_URL =
   process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/+$/, "") ||
   "https://ai-medical-chabot.com";
 
-const SITE_NAME = "MedOS";
-const SITE_TITLE = "MedOS — your worldwide medical assistant";
+const SITE_NAME = "RedRise";
+const SITE_TITLE = "RedRise — wellness companion";
 const SITE_DESCRIPTION_LONG =
-  "Tell MedOS what's bothering you. Instant, private, multilingual health guidance aligned with WHO, CDC, and NHS.";
+  "Rise from the fog with private tracking for mood, brain fog, energy, sleep, supplements, and daily habits.";
 const SITE_DESCRIPTION_SHORT =
-  "Private, multilingual health guidance aligned with WHO, CDC, and NHS — available 24/7.";
+  "A private wellness companion for mood, brain fog, energy, sleep, supplements, and daily habits.";
 
 export const metadata: Metadata = {
-  // metadataBase is required for `openGraph.url` and `openGraph.images`
-  // to resolve relative URLs (Next.js emits a warning at build otherwise
-  // and falls back to localhost, which kills link previews in
-  // production).
   metadataBase: new URL(SITE_URL),
   title: SITE_TITLE,
   description: SITE_DESCRIPTION_LONG,
-  keywords: ["medical AI", "healthcare", "chatbot", "telemedicine", "WHO", "CDC"],
-  authors: [{ name: "MedOS Team" }],
+  keywords: ["wellness", "mood tracking", "brain fog", "sleep", "energy", "supplement tracking"],
+  authors: [{ name: "RedRise Team" }],
   applicationName: SITE_NAME,
   manifest: "/manifest.webmanifest",
   icons: {
@@ -48,17 +42,12 @@ export const metadata: Metadata = {
     description: SITE_DESCRIPTION_SHORT,
     url: SITE_URL,
     locale: "en_US",
-    // Image is supplied by app/opengraph-image.tsx (dynamic), which
-    // Next.js automatically wires into <meta property="og:image"> when
-    // present. Listing it here is redundant but makes the intent
-    // explicit and gives explorers like Twitter's card validator a
-    // direct hit.
     images: [
       {
         url: "/opengraph-image",
         width: 1200,
         height: 630,
-        alt: "MedOS — your worldwide medical assistant",
+        alt: "RedRise — wellness companion",
       },
     ],
   },
@@ -67,8 +56,6 @@ export const metadata: Metadata = {
     title: SITE_TITLE,
     description: SITE_DESCRIPTION_SHORT,
     images: ["/twitter-image"],
-    // No personal Twitter handle to avoid stale references; can be
-    // added once a brand account exists.
   },
   robots: { index: true, follow: true },
   appleWebApp: {
@@ -92,9 +79,6 @@ export const viewport: Viewport = {
   ],
 };
 
-/**
- * Inline pre-hydration script: reads the stored theme before first paint.
- */
 const themeBootstrap = `
 (function() {
   try {
