@@ -9,7 +9,19 @@ export interface User {
   emailVerified: boolean;
   isAdmin?: boolean;
   createdAt?: string;
+  consent_given?: boolean;
+  consent_date?: string | null;
+  partner_data_sharing_consent?: boolean;
+  partner_data_sharing_consent_date?: string | null;
 }
+
+export type RegistrationOptions = {
+  displayName?: string;
+  consent_given: boolean;
+  consent_date: string;
+  partner_data_sharing_consent: boolean;
+  partner_data_sharing_consent_date?: string | null;
+};
 
 const TOKEN_KEY = "medos_auth_token";
 
@@ -30,7 +42,6 @@ export function useAuth() {
     }
   }, []);
 
-  // Restore session on mount.
   useEffect(() => {
     const t = localStorage.getItem(TOKEN_KEY);
     if (!t) { setLoading(false); return; }
@@ -49,12 +60,23 @@ export function useAuth() {
   }, [persistToken]);
 
   const register = useCallback(
-    async (email: string, password: string, opts?: { displayName?: string }) => {
+    async (email: string, password: string, opts: RegistrationOptions) => {
+      if (!opts?.consent_given) {
+        return { ok: false as const, error: "Health-related data processing consent is required to create an account." };
+      }
       try {
         const res = await fetch("/api/proxy/auth/register", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email, password, displayName: opts?.displayName }),
+          body: JSON.stringify({
+            email,
+            password,
+            displayName: opts.displayName,
+            consent_given: opts.consent_given,
+            consent_date: opts.consent_date,
+            partner_data_sharing_consent: opts.partner_data_sharing_consent,
+            partner_data_sharing_consent_date: opts.partner_data_sharing_consent_date || null,
+          }),
         });
         const data = await res.json();
         if (!res.ok) return { ok: false as const, error: data.error || "Registration failed" };
@@ -70,10 +92,6 @@ export function useAuth() {
 
   const login = useCallback(
     async (email: string, password: string) => {
-      // One retry on cold-start: HF Spaces sleep, and the first request
-      // can timeout while the container wakes. The retry usually
-      // succeeds because the proxy's earlier timeout still nudged the
-      // Space into warming up.
       const attempt = async () =>
         fetch("/api/proxy/auth/login", {
           method: "POST",
@@ -98,25 +116,22 @@ export function useAuth() {
     [persistToken],
   );
 
-  const verifyEmail = useCallback(
-    async (code: string) => {
-      try {
-        const t = localStorage.getItem(TOKEN_KEY);
-        const res = await fetch("/api/proxy/auth/verify-email", {
-          method: "POST",
-          headers: { "Content-Type": "application/json", Authorization: `Bearer ${t}` },
-          body: JSON.stringify({ code }),
-        });
-        const data = await res.json();
-        if (!res.ok) return { ok: false as const, error: data.error };
-        setUser((u) => (u ? { ...u, emailVerified: true } : u));
-        return { ok: true as const };
-      } catch {
-        return { ok: false as const, error: "Network error" };
-      }
-    },
-    [],
-  );
+  const verifyEmail = useCallback(async (code: string) => {
+    try {
+      const t = localStorage.getItem(TOKEN_KEY);
+      const res = await fetch("/api/proxy/auth/verify-email", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${t}` },
+        body: JSON.stringify({ code }),
+      });
+      const data = await res.json();
+      if (!res.ok) return { ok: false as const, error: data.error };
+      setUser((u) => (u ? { ...u, emailVerified: true } : u));
+      return { ok: true as const };
+    } catch {
+      return { ok: false as const, error: "Network error" };
+    }
+  }, []);
 
   const resendVerification = useCallback(async () => {
     const t = localStorage.getItem(TOKEN_KEY);
@@ -140,24 +155,48 @@ export function useAuth() {
     }
   }, []);
 
-  const resetPassword = useCallback(
-    async (email: string, code: string, newPassword: string) => {
-      try {
-        const res = await fetch("/api/proxy/auth/reset-password", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email, code, newPassword }),
-        });
-        const data = await res.json();
-        if (!res.ok) return { ok: false as const, error: data.error };
-        if (data.token) persistToken(data.token);
-        return { ok: true as const };
-      } catch {
-        return { ok: false as const, error: "Network error" };
-      }
-    },
-    [persistToken],
-  );
+  const resetPassword = useCallback(async (email: string, code: string, newPassword: string) => {
+    try {
+      const res = await fetch("/api/proxy/auth/reset-password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, code, newPassword }),
+      });
+      const data = await res.json();
+      if (!res.ok) return { ok: false as const, error: data.error };
+      if (data.token) persistToken(data.token);
+      return { ok: true as const };
+    } catch {
+      return { ok: false as const, error: "Network error" };
+    }
+  }, [persistToken]);
+
+  const updatePartnerDataSharingConsent = useCallback(async (enabled: boolean) => {
+    const t = localStorage.getItem(TOKEN_KEY);
+    if (!t) return { ok: false as const, error: "Not authenticated" };
+    const now = new Date().toISOString();
+    try {
+      const res = await fetch("/api/proxy/auth/me", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${t}` },
+        body: JSON.stringify({
+          partner_data_sharing_consent: enabled,
+          partner_data_sharing_consent_date: now,
+        }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) return { ok: false as const, error: data.error || "Could not update consent" };
+      setUser((u) => u ? {
+        ...u,
+        partner_data_sharing_consent: enabled,
+        partner_data_sharing_consent_date: now,
+        ...(data.user || {}),
+      } : u);
+      return { ok: true as const };
+    } catch {
+      return { ok: false as const, error: "Network error" };
+    }
+  }, []);
 
   const logout = useCallback(async () => {
     const t = localStorage.getItem(TOKEN_KEY);
@@ -166,39 +205,24 @@ export function useAuth() {
     setUser(null);
   }, [persistToken]);
 
-  /**
-   * Self-service account deletion (GDPR Art. 17). The backend at
-   * DELETE /api/auth/me enforces password re-auth, email match,
-   * admin-self-delete block, and per-IP rate limiting; this hook
-   * only forwards the request and wipes local state on success
-   * (same as logout). On any non-2xx response we surface the
-   * backend's error verbatim so the user sees "Password is
-   * incorrect" / "Email confirmation does not match" / "Too many
-   * deletion attempts" rather than a generic failure.
-   */
-  const deleteMe = useCallback(
-    async (password: string, confirmEmail: string) => {
-      const t = localStorage.getItem(TOKEN_KEY);
-      if (!t) return { ok: false as const, error: "Not authenticated" };
-      try {
-        const res = await fetch("/api/proxy/auth/me", {
-          method: "DELETE",
-          headers: { "Content-Type": "application/json", Authorization: `Bearer ${t}` },
-          body: JSON.stringify({ password, confirmEmail }),
-        });
-        const data = await res.json().catch(() => ({}));
-        if (!res.ok) {
-          return { ok: false as const, error: data.error || "Account deletion failed" };
-        }
-        persistToken(null);
-        setUser(null);
-        return { ok: true as const, message: data.message };
-      } catch {
-        return { ok: false as const, error: "Network error" };
-      }
-    },
-    [persistToken],
-  );
+  const deleteMe = useCallback(async (password: string, confirmEmail: string) => {
+    const t = localStorage.getItem(TOKEN_KEY);
+    if (!t) return { ok: false as const, error: "Not authenticated" };
+    try {
+      const res = await fetch("/api/proxy/auth/me", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${t}` },
+        body: JSON.stringify({ password, confirmEmail, purge_personal_data: true }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) return { ok: false as const, error: data.error || "Account deletion failed" };
+      persistToken(null);
+      setUser(null);
+      return { ok: true as const, message: data.message };
+    } catch {
+      return { ok: false as const, error: "Network error" };
+    }
+  }, [persistToken]);
 
   return {
     user,
@@ -212,6 +236,7 @@ export function useAuth() {
     resendVerification,
     forgotPassword,
     resetPassword,
+    updatePartnerDataSharingConsent,
     logout,
     deleteMe,
   };
