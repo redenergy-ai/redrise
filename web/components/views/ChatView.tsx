@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useRef, useEffect, useState } from "react";
-import { X, Stethoscope, CheckCircle2 } from "lucide-react";
+import { X, Sparkles, CheckCircle2 } from "lucide-react";
 import { MessageBubble } from "../chat/MessageBubble";
 import { HeroInput } from "../chat/HeroInput";
 import { TypingIndicator } from "../chat/TypingIndicator";
@@ -21,22 +21,11 @@ interface ChatViewProps {
   voiceEnabled?: boolean;
   readAloud?: boolean;
   onNavigateEmergency?: () => void;
-  /** Fired when the user taps a button inside a card (greeting,
-   *  profile_gate, …). Parents typically synthesize a follow-up user
-   *  message for intent chips, or navigate for routing actions. */
   onCardAction?: (action: import("@/lib/medical-flow/types").Action, card: import("@/lib/medical-flow/types").Card) => void;
-  /** Set by the parent right after the user finishes the EHR wizard with
-   *  "Save & continue chat". Renders a one-time dismissible card that names
-   *  what the AI now knows about the patient — the explicit payoff signal
-   *  that closes the wizard → chat loop. */
   profileWelcome?: boolean;
   onDismissProfileWelcome?: () => void;
-  /** Used to summarise the saved profile in the welcome card. */
   ehrProfile?: EHRProfile;
   activeMedicationsCount?: number;
-  /** Session context fed to the medical-flow safety validator on every
-   *  rendered AI message — enforces locale-correct emergency_number
-   *  and patient-allergy scrubbing before the card hits the screen. */
   validatorContext?: ValidatorContext;
 }
 
@@ -64,18 +53,6 @@ export function ChatView({
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, isTyping]);
 
-  // The persistent top-of-thread "This may be an emergency / Call 112"
-  // banner was removed. It was authored client-side from a fixed i18n
-  // template and fired as soon as the user typed an emergency keyword,
-  // which made the reply feel hardcoded (a wall of red instructions
-  // shown BEFORE the model had a chance to answer). The safety floor
-  // is still enforced server-side: when preCheck() classifies the
-  // turn as R5 the chat route weaves the emergency-template text into
-  // the bot's reply itself, so the user always sees the call-emergency
-  // guidance — just delivered conversationally as part of the bot's
-  // message, not pinned above it.
-
-  // Read aloud the latest AI message.
   useEffect(() => {
     if (!readAloud || messages.length === 0) return;
     const last = messages[messages.length - 1];
@@ -116,17 +93,8 @@ export function ChatView({
     setIsListening(false);
   };
 
-  // True once the user has actually started a conversation. The thread
-  // now begins empty (the canned "Hello! I'm your medical AI assistant…"
-  // bubble was removed for a more professional, real-time voice), so we
-  // gate on >= 1 instead of > 1.
   const hasMessages = messages.length >= 1;
 
-  // Dynamic suggestions — three chips picked at random from a curated
-  // localized bank of ~50 prompts. Re-memoizes on language change (so
-  // switching languages reshuffles in the new language), and re-rolls
-  // whenever the user lands on an empty chat — that's the "New chat"
-  // entry point. Hidden once the conversation starts.
   const suggestions = useMemo(() => {
     if (hasMessages) return [];
     return pickRandom(getExampleQuestions(language), 3);
@@ -134,19 +102,18 @@ export function ChatView({
 
   return (
     <>
-      {/* Conversation area */}
       <div className="flex-1 overflow-y-auto scroll-smooth scroll-touch">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 py-8 pb-mobile-nav">
           {!hasMessages && (
             <div className="text-center mb-8 animate-fade-up">
               <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-brand-gradient shadow-glow mb-4">
-                <Stethoscope size={24} className="text-white" />
+                <Sparkles size={24} className="text-white" />
               </div>
               <h2 className="text-2xl font-bold text-ink-base tracking-tight mb-2">
-                {t("ask_hero_title", language)}
+                RedRise wellness companion
               </h2>
               <p className="text-ink-muted leading-relaxed max-w-md mx-auto">
-                {t("ask_hero_subtitle", language)}
+                Talk through how you feel, what you are tracking, and the patterns you want to understand.
               </p>
               <div className="mt-5">
                 <TrustBar language={language} />
@@ -166,15 +133,6 @@ export function ChatView({
             <MessageBubble
               key={msg.id}
               message={msg}
-              /* Source chip is a clinical-trust signal — only show
-               * it when the assistant's reply ACTUALLY gives medical
-               * guidance. Three suppressions:
-               *   1. Card-only turns (greeting, profile_gate, intake)
-               *      carry their own framing — chip would feel decorative.
-               *   2. Pure greetings ("Hi, how can I help?") — chip is
-               *      misleading there.
-               *   3. After the second AI turn — the chip's job is to
-               *      establish trust once, not annotate every reply. */
               showSourceChip={
                 msg.role === "ai" &&
                 i <= 1 &&
@@ -193,7 +151,6 @@ export function ChatView({
         </div>
       </div>
 
-      {/* Voice listening pill */}
       {isListening && (
         <div className="mx-auto -mb-2 max-w-3xl w-full px-4 sm:px-6">
           <div className="flex items-center justify-center gap-2 py-2 rounded-full bg-brand-500/10 border border-brand-500/30 text-brand-600 dark:text-brand-400 text-sm font-medium animate-pulse">
@@ -205,7 +162,6 @@ export function ChatView({
         </div>
       )}
 
-      {/* Sticky composer — most important element. Stays above mobile keyboard. */}
       <div className="sticky-bottom-keyboard px-4 sm:px-6 pt-3 pb-5 pb-safe-area bg-gradient-to-t from-surface-0 via-surface-0/95 to-transparent">
         <div className="max-w-3xl mx-auto">
           <HeroInput
@@ -217,10 +173,6 @@ export function ChatView({
             voiceEnabled={voiceEnabled}
             suggestions={suggestions}
             autoFocus
-            // Once the user has sent at least one message, freeze the
-            // rotating examples to a single neutral hint. The rotation
-            // was bleeding visually into the bot's "Analyzing symptoms…"
-            // typing indicator and reading like a canned suggestion.
             staticPlaceholder={hasMessages}
           />
         </div>
@@ -229,14 +181,6 @@ export function ChatView({
   );
 }
 
-/**
- * One-time card shown after the user finishes the EHR wizard via
- * "Save & continue chat". The purpose is single: confirm in plain
- * language what the AI now knows so the user feels the payoff before
- * sending their next message. No diagnosis claims, no medical advice —
- * just a factual recap and an "augments, doesn't replace, a clinician"
- * reassurance, matching the enterprise medical-support tone.
- */
 function ProfileWelcome({
   profile,
   activeMedicationsCount,
@@ -246,10 +190,6 @@ function ProfileWelcome({
   activeMedicationsCount: number;
   onDismiss?: () => void;
 }) {
-  // Build a short factual summary from whatever the user filled in.
-  // We intentionally only mention fields that are PRESENT so the card
-  // never says "0 medications" or "no conditions known" — both of which
-  // read as accusatory for a healthy user just trying out the app.
   const summary = useMemo(() => {
     const p = profile || {};
     const parts: string[] = [];
@@ -292,7 +232,7 @@ function ProfileWelcome({
         </div>
         <div className="flex-1 min-w-0">
           <p className="font-semibold text-ink-base text-sm">
-            Profile saved — MedOS will tailor its replies
+            Profile saved — RedRise will tailor its wellness reflections
           </p>
           {summary && (
             <p className="mt-0.5 text-xs text-ink-muted truncate">
@@ -300,8 +240,7 @@ function ProfileWelcome({
             </p>
           )}
           <p className="mt-2 text-[11px] text-ink-subtle leading-relaxed">
-            Your next question will use this context. This augments, but does not
-            replace, a licensed healthcare provider.
+            RedRise provides general wellness information and self-tracking support. It is not medical care and does not replace a qualified healthcare professional.
           </p>
         </div>
         {onDismiss && (

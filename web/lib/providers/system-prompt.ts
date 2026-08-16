@@ -1,19 +1,19 @@
 /**
- * Thin compatibility layer around `lib/medical-knowledge.ts`.
- *
- * Providers import from here so we can swap prompt implementations
- * without touching every provider file.
+ * Provider-facing compatibility layer for the RedRise wellness prompt.
  */
 import {
-  buildMedicalSystemPrompt,
-  MEDICAL_SYSTEM_PROMPT_FALLBACK,
-  type MedicalContext,
+  buildWellnessSystemPrompt,
+  WELLNESS_SYSTEM_PROMPT_FALLBACK,
+  type WellnessContext,
 } from "../medical-knowledge";
 
-export const MEDICAL_SYSTEM_PROMPT = MEDICAL_SYSTEM_PROMPT_FALLBACK;
+export const WELLNESS_SYSTEM_PROMPT = WELLNESS_SYSTEM_PROMPT_FALLBACK;
 
-export function resolveSystemPrompt(context?: MedicalContext): string {
-  return context ? buildMedicalSystemPrompt(context) : MEDICAL_SYSTEM_PROMPT;
+export function resolveSystemPrompt(context?: WellnessContext): string {
+  return context ? buildWellnessSystemPrompt(context) : WELLNESS_SYSTEM_PROMPT;
 }
 
-export type { MedicalContext };
+// Temporary compatibility exports for existing provider imports.
+export const MEDICAL_SYSTEM_PROMPT = WELLNESS_SYSTEM_PROMPT;
+export type MedicalContext = WellnessContext;
+export type { WellnessContext };
