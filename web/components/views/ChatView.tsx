@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useRef, useEffect, useState } from "react";
-import { X, Sparkles, CheckCircle2, Leaf } from "lucide-react";
+import { X, Sparkles, CheckCircle2, Leaf, ExternalLink } from "lucide-react";
 import { MessageBubble } from "../chat/MessageBubble";
 import { HeroInput } from "../chat/HeroInput";
 import { TypingIndicator } from "../chat/TypingIndicator";
@@ -15,6 +15,12 @@ import {
   getSupplementSuggestionsForText,
   type SupplementSuggestionMatch,
 } from "@/lib/supplements/mapping";
+import {
+  AFFILIATE_DISCLOSURE,
+  buildAffiliateUrl,
+  getMerchantProductId,
+  trackReferralClick,
+} from "@/lib/affiliate/referrals";
 
 interface ChatViewProps {
   messages: ChatMessage[];
@@ -223,20 +229,40 @@ function SupplementSuggestions({ matches }: { matches: SupplementSuggestionMatch
             Based on your mention of {matches.map((match) => match.symptom).join(", ")}, these are educational matches from the RedRise supplement catalog.
           </p>
           <div className="mt-3 grid gap-2">
-            {supplements.map((supplement) => (
-              <div key={supplement.id} className="rounded-xl bg-surface-0/80 border border-surface-3 p-3">
-                <div className="flex items-center justify-between gap-3">
-                  <p className="text-sm font-semibold text-ink-base">{supplement.name}</p>
-                  <span className="text-[10px] uppercase tracking-wide text-ink-subtle">{supplement.brand}</span>
+            {supplements.map((supplement) => {
+              const productId = getMerchantProductId(supplement.id);
+              const affiliateUrl = buildAffiliateUrl(supplement.id);
+
+              return (
+                <div key={supplement.id} className="rounded-xl bg-surface-0/80 border border-surface-3 p-3">
+                  <div className="flex items-center justify-between gap-3">
+                    <p className="text-sm font-semibold text-ink-base">{supplement.name}</p>
+                    <span className="text-[10px] uppercase tracking-wide text-ink-subtle">{supplement.brand}</span>
+                  </div>
+                  <p className="mt-1 text-xs text-ink-muted leading-relaxed">
+                    {supplement.primaryBenefits.slice(0, 2).join(" · ")}
+                  </p>
+                  {affiliateUrl && productId && (
+                    <a
+                      href={affiliateUrl}
+                      target="_blank"
+                      rel="sponsored noopener noreferrer"
+                      onClick={() => void trackReferralClick(productId)}
+                      className="mt-3 inline-flex items-center gap-1.5 rounded-lg border border-brand-500/30 bg-brand-500/10 px-3 py-2 text-xs font-semibold text-brand-700 dark:text-brand-300 hover:bg-brand-500/15 transition-colors"
+                    >
+                      View Natra-Heal product
+                      <ExternalLink size={13} />
+                    </a>
+                  )}
                 </div>
-                <p className="mt-1 text-xs text-ink-muted leading-relaxed">
-                  {supplement.primaryBenefits.slice(0, 2).join(" · ")}
-                </p>
-              </div>
-            ))}
+              );
+            })}
           </div>
           <p className="mt-3 text-[11px] text-ink-subtle leading-relaxed">
             Educational discovery only — not a recommendation to start or buy a supplement. Check interactions, allergies, pregnancy/breastfeeding considerations, and suitability with a pharmacist or qualified healthcare professional when relevant.
+          </p>
+          <p className="mt-2 text-[11px] text-ink-subtle leading-relaxed">
+            {AFFILIATE_DISCLOSURE}
           </p>
         </div>
       </div>
