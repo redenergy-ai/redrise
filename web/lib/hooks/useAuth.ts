@@ -24,6 +24,7 @@ export type RegistrationOptions = {
 };
 
 const TOKEN_KEY = "medos_auth_token";
+const USER_ID_KEY = "redrise_user_id";
 
 export function useAuth() {
   const [user, setUser] = useState<User | null>(null);
@@ -42,79 +43,79 @@ export function useAuth() {
     }
   }, []);
 
+  const persistUser = useCallback((next: User | null) => {
+    setUser(next);
+    if (next?.id) localStorage.setItem(USER_ID_KEY, next.id);
+    else localStorage.removeItem(USER_ID_KEY);
+  }, []);
+
   useEffect(() => {
     const t = localStorage.getItem(TOKEN_KEY);
-    if (!t) { setLoading(false); return; }
+    if (!t) { persistUser(null); setLoading(false); return; }
     fetch("/api/proxy/auth/me", { headers: { Authorization: `Bearer ${t}` } })
       .then((r) => (r.ok ? r.json() : null))
       .then((data) => {
         if (data?.user) {
           persistToken(t);
-          setUser(data.user);
+          persistUser(data.user);
         } else {
           persistToken(null);
+          persistUser(null);
         }
       })
       .catch(() => {})
       .finally(() => setLoading(false));
-  }, [persistToken]);
+  }, [persistToken, persistUser]);
 
-  const register = useCallback(
-    async (email: string, password: string, opts: RegistrationOptions) => {
-      if (!opts?.consent_given) {
-        return { ok: false as const, error: "Health-related data processing consent is required to create an account." };
-      }
-      try {
-        const res = await fetch("/api/proxy/auth/register", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            email,
-            password,
-            displayName: opts.displayName,
-            consent_given: opts.consent_given,
-            consent_date: opts.consent_date,
-            partner_data_sharing_consent: opts.partner_data_sharing_consent,
-            partner_data_sharing_consent_date: opts.partner_data_sharing_consent_date || null,
-          }),
-        });
-        const data = await res.json();
-        if (!res.ok) return { ok: false as const, error: data.error || "Registration failed" };
-        persistToken(data.token);
-        setUser(data.user);
-        return { ok: true as const, needsVerification: !data.user.emailVerified };
-      } catch {
-        return { ok: false as const, error: "Network error" };
-      }
-    },
-    [persistToken],
-  );
+  const register = useCallback(async (email: string, password: string, opts: RegistrationOptions) => {
+    if (!opts?.consent_given) {
+      return { ok: false as const, error: "Health-related data processing consent is required to create an account." };
+    }
+    try {
+      const res = await fetch("/api/proxy/auth/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email,
+          password,
+          displayName: opts.displayName,
+          consent_given: opts.consent_given,
+          consent_date: opts.consent_date,
+          partner_data_sharing_consent: opts.partner_data_sharing_consent,
+          partner_data_sharing_consent_date: opts.partner_data_sharing_consent_date || null,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) return { ok: false as const, error: data.error || "Registration failed" };
+      persistToken(data.token);
+      persistUser(data.user);
+      return { ok: true as const, needsVerification: !data.user.emailVerified };
+    } catch {
+      return { ok: false as const, error: "Network error" };
+    }
+  }, [persistToken, persistUser]);
 
-  const login = useCallback(
-    async (email: string, password: string) => {
-      const attempt = async () =>
-        fetch("/api/proxy/auth/login", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email, password }),
-        });
-      try {
-        let res = await attempt();
-        let data = await res.json().catch(() => ({}));
-        if (!res.ok && data?.code === "backend_cold_start") {
-          res = await attempt();
-          data = await res.json().catch(() => ({}));
-        }
-        if (!res.ok) return { ok: false as const, error: data.error || "Login failed" };
-        persistToken(data.token);
-        setUser(data.user);
-        return { ok: true as const };
-      } catch {
-        return { ok: false as const, error: "Network error" };
+  const login = useCallback(async (email: string, password: string) => {
+    const attempt = async () => fetch("/api/proxy/auth/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, password }),
+    });
+    try {
+      let res = await attempt();
+      let data = await res.json().catch(() => ({}));
+      if (!res.ok && data?.code === "backend_cold_start") {
+        res = await attempt();
+        data = await res.json().catch(() => ({}));
       }
-    },
-    [persistToken],
-  );
+      if (!res.ok) return { ok: false as const, error: data.error || "Login failed" };
+      persistToken(data.token);
+      persistUser(data.user);
+      return { ok: true as const };
+    } catch {
+      return { ok: false as const, error: "Network error" };
+    }
+  }, [persistToken, persistUser]);
 
   const verifyEmail = useCallback(async (code: string) => {
     try {
@@ -126,7 +127,7 @@ export function useAuth() {
       });
       const data = await res.json();
       if (!res.ok) return { ok: false as const, error: data.error };
-      setUser((u) => (u ? { ...u, emailVerified: true } : u));
+      setUser((current) => current ? { ...current, emailVerified: true } : current);
       return { ok: true as const };
     } catch {
       return { ok: false as const, error: "Network error" };
@@ -165,11 +166,12 @@ export function useAuth() {
       const data = await res.json();
       if (!res.ok) return { ok: false as const, error: data.error };
       if (data.token) persistToken(data.token);
+      if (data.user) persistUser(data.user);
       return { ok: true as const };
     } catch {
       return { ok: false as const, error: "Network error" };
     }
-  }, [persistToken]);
+  }, [persistToken, persistUser]);
 
   const updatePartnerDataSharingConsent = useCallback(async (enabled: boolean) => {
     const t = localStorage.getItem(TOKEN_KEY);
@@ -186,12 +188,12 @@ export function useAuth() {
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) return { ok: false as const, error: data.error || "Could not update consent" };
-      setUser((u) => u ? {
-        ...u,
+      setUser((current) => current ? {
+        ...current,
         partner_data_sharing_consent: enabled,
         partner_data_sharing_consent_date: now,
         ...(data.user || {}),
-      } : u);
+      } : current);
       return { ok: true as const };
     } catch {
       return { ok: false as const, error: "Network error" };
@@ -202,8 +204,8 @@ export function useAuth() {
     const t = localStorage.getItem(TOKEN_KEY);
     if (t) fetch("/api/proxy/auth/logout", { method: "POST", headers: { Authorization: `Bearer ${t}` } }).catch(() => {});
     persistToken(null);
-    setUser(null);
-  }, [persistToken]);
+    persistUser(null);
+  }, [persistToken, persistUser]);
 
   const deleteMe = useCallback(async (password: string, confirmEmail: string) => {
     const t = localStorage.getItem(TOKEN_KEY);
@@ -217,12 +219,12 @@ export function useAuth() {
       const data = await res.json().catch(() => ({}));
       if (!res.ok) return { ok: false as const, error: data.error || "Account deletion failed" };
       persistToken(null);
-      setUser(null);
+      persistUser(null);
       return { ok: true as const, message: data.message };
     } catch {
       return { ok: false as const, error: "Network error" };
     }
-  }, [persistToken]);
+  }, [persistToken, persistUser]);
 
   return {
     user,
