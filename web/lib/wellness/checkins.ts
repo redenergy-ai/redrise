@@ -38,7 +38,12 @@ function keyFor(userId?: string | null): string {
 export function readAuthIdentity(): { userId: string | null; token: string | null } {
   if (typeof window === "undefined") return { userId: null, token: null };
   const token = window.localStorage.getItem("medos_auth_token");
+  const persistedUserId = window.localStorage.getItem("redrise_user_id");
   if (!token) return { userId: null, token: null };
+  if (persistedUserId) return { userId: persistedUserId, token };
+
+  // Compatibility fallback for existing sessions created before the explicit
+  // RedRise user-id cache was introduced.
   try {
     const payload = JSON.parse(atob(token.split(".")[1].replace(/-/g, "+").replace(/_/g, "/")));
     const userId = String(payload.sub || payload.user_id || payload.id || "").trim() || null;
