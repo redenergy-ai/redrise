@@ -185,11 +185,17 @@ function WeeklySummary({ week, correlations }: { week: ReturnType<typeof lastSev
               <p className="mt-2 text-xs text-ink-muted">Log supplements on both taken and non-taken days to compare your own scores.</p>
             ) : (
               <div className="mt-2 space-y-2">
-                {correlations.map((item) => (
-                  <div key={`${item.supplement}-${item.metric}`} className="rounded-xl bg-brand-500/5 border border-brand-500/15 p-3 text-xs text-ink-muted leading-relaxed">
-                    On days you logged <strong className="text-ink-base">{item.supplement}</strong>, your {item.metric} score averaged <strong className="text-ink-base">{item.withAverage.toFixed(1)}</strong> vs. <strong className="text-ink-base">{item.withoutAverage.toFixed(1)}</strong> on days you did not ({item.withDays} vs {item.withoutDays} day{item.withoutDays === 1 ? "" : "s"}).
-                  </div>
-                ))}
+                {correlations.map((item) => {
+                  const percentage = item.withoutAverage === 0 ? null : (item.difference / item.withoutAverage) * 100;
+                  const comparison = percentage == null
+                    ? ""
+                    : ` — ${Math.abs(percentage).toFixed(0)}% ${percentage >= 0 ? "higher" : "lower"}`;
+                  return (
+                    <div key={`${item.supplement}-${item.metric}`} className="rounded-xl bg-brand-500/5 border border-brand-500/15 p-3 text-xs text-ink-muted leading-relaxed">
+                      On days you logged <strong className="text-ink-base">{item.supplement}</strong>, your {item.metric} score averaged <strong className="text-ink-base">{item.withAverage.toFixed(1)}</strong> vs. <strong className="text-ink-base">{item.withoutAverage.toFixed(1)}</strong> on days you did not{comparison} ({item.withDays} vs {item.withoutDays} day{item.withoutDays === 1 ? "" : "s"}).
+                    </div>
+                  );
+                })}
               </div>
             )}
             <p className="mt-3 text-[11px] text-ink-subtle leading-relaxed">These are simple within-your-log associations. They do not show that a supplement caused a change; sleep, routines, stress and other factors may differ between days.</p>
