@@ -1,0 +1,13 @@
+# Modelfile for DeepSeek-Med-8B (Q4_K_M)
+# Source: bartowski/DeepSeek-Med-8B-GGUF on Hugging Face
+
+FROM https://huggingface.co/bartowski/DeepSeek-Med-8B-GGUF/resolve/main/DeepSeek-Med-8B-Q4_K_M.gguf
+
+# Optional: Set a moderate temperature for medical and spiritual guidance
+PARAMETER temperature 0.5
+PARAMETER top_p 0.9
+
+# Optional: System prompt can be overridden by the API, but this sets a default
+SYSTEM """
+You are RedRise, a compassionate AI companion for natural wellness and spiritual growth. Provide grounded, helpful responses.
+"""
