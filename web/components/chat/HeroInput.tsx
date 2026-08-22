@@ -50,6 +50,8 @@ export function HeroInput({
   staticPlaceholder = false,
 }: HeroInputProps) {
   const [value, setValue] = useState("");
+  const [isRedRiseMode, setIsRedRiseMode] = useState(false);
+  const [isRedRiseLoading, setIsRedRiseLoading] = useState(false);
   const taRef = useRef<HTMLTextAreaElement | null>(null);
 
   // Rotating empathetic placeholders for the empty-home / welcome screen.
@@ -74,9 +76,11 @@ export function HeroInput({
   // Once the conversation has started, switch to a single neutral hint
   // so the textarea below the typing indicator never reads like a bot
   // suggestion.
-  const placeholderText = staticPlaceholder
-    ? t("ask_placeholder", language)
-    : rotating[rotIdx];
+  const placeholderText = isRedRiseMode
+    ? "Ask about herbs, pause, or journey..."
+    : staticPlaceholder
+      ? t("ask_placeholder", language)
+      : rotating[rotIdx];
 
   // Auto-grow textarea.
   useEffect(() => {
@@ -94,13 +98,41 @@ export function HeroInput({
   const handleKey = (e: KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
-      submit();
+      void submit();
     }
   };
 
-  const submit = () => {
+  const submit = async () => {
     const v = value.trim();
-    if (!v) return;
+    if (!v || isRedRiseLoading) return;
+
+    if (isRedRiseMode) {
+      setIsRedRiseLoading(true);
+      setValue("");
+      try {
+        const res = await fetch("/api/redrise", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ query: v }),
+        });
+        const data = await res.json();
+        if (data.answer) {
+          onSend(data.answer);
+        } else if (data.clarification) {
+          onSend(data.clarification);
+        } else {
+          onSend("I did not understand. Please rephrase your question.");
+        }
+      } catch (err) {
+        console.error("RedRise error:", err);
+        onSend("Sorry, the RedRise service is currently unavailable.");
+      } finally {
+        setIsRedRiseLoading(false);
+      }
+      return;
+    }
+
+    // Existing MedOS chat flow remains unchanged when RedRise mode is off.
     onSend(v);
     setValue("");
   };
@@ -134,8 +166,23 @@ export function HeroInput({
                 isHero ? "text-lg" : "text-base"
               }`}
               aria-label={t("ask_placeholder", language)}
+              disabled={isRedRiseLoading}
             />
           </div>
+
+          {/* RedRise mode toggle */}
+          <button
+            type="button"
+            onClick={() => setIsRedRiseMode(!isRedRiseMode)}
+            className={`p-2 rounded-full transition-colors ${
+              isRedRiseMode
+                ? "bg-purple-500 text-white hover:bg-purple-600"
+                : "bg-gray-200 text-gray-600 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-300"
+            }`}
+            title={isRedRiseMode ? "Switch to Medical Mode" : "Switch to RedRise (Spiritual/Herbal)"}
+          >
+            <Sparkles className="w-5 h-5" />
+          </button>
 
           {/* Voice */}
           {voiceEnabled && (
@@ -156,13 +203,13 @@ export function HeroInput({
           {/* Send — always present, brand gradient when there's text */}
           <button
             type="button"
-            onClick={submit}
-            disabled={!value.trim()}
+            onClick={() => void submit()}
+            disabled={!value.trim() || isRedRiseLoading}
             aria-label="Send"
             className={`flex-shrink-0 rounded-full flex items-center justify-center transition-all ${
               isHero ? "w-12 h-12" : "w-10 h-10"
             } ${
-              value.trim()
+              value.trim() && !isRedRiseLoading
                 ? "bg-brand-gradient text-white shadow-glow hover:brightness-110"
                 : "bg-surface-2 text-ink-subtle cursor-not-allowed"
             }`}
@@ -171,6 +218,12 @@ export function HeroInput({
           </button>
         </div>
       </div>
+
+      {isRedRiseMode && (
+        <div className="mt-1 text-xs text-purple-500 dark:text-purple-400 font-medium flex items-center gap-1">
+          <Sparkles className="w-3 h-3" /> RedRise Mode (Herbal / Pause / Journey)
+        </div>
+      )}
 
       {/* Suggestion chips — dynamic, click to send */}
       {suggestions.length > 0 && (
