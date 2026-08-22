@@ -106,3 +106,19 @@ export const PROVIDER_CONFIGS: Record<Provider, ProviderConfig> = {
     ],
   },
 };
+
+// === RedRise Types ===
+
+export interface RedRiseRequest {
+  query: string;
+  phase?: 'herbal' | 'pause' | 'journey';
+}
+
+export interface RedRiseResponse {
+  answer: string;
+  phase: 'herbal' | 'pause' | 'journey' | 'clarify' | 'error';
+  confidence: number;
+  method?: string;
+  sources?: string[];
+  clarification?: string;
+}
