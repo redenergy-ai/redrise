@@ -1,16 +1,27 @@
 # Tapering Video Library
 
-- Outro Health YouTube: https://www.youtube.com/@outrohealth
+A curated collection of tapering‑specific videos.
+
+---
+
+## Primary Resource
+
+**Outro Health YouTube Channel**
+
+**Link:** https://www.youtube.com/@outrohealth
+
+**Best starting point:** Outro Health's general SSRI/SNRI taper webinar covers the principles of hyperbolic tapering and applies to all SSRIs/SNRIs.
+
+---
 
 ## Specific Medication Videos
 
-- Effexor (Venlafaxine): [Link]
-- Lexapro (Escitalopram): [Link]
-- Cymbalta (Duloxetine): [Link]
-- Zoloft (Sertraline): [Link]
-- Paxil (Paroxetine): [Link]
-- [Add more as they become available]
+| Medication | Link | Status |
+| :--- | :--- | :--- |
+| Effexor (Venlafaxine) | [Link] | To be confirmed |
+| Lexapro (Escitalopram) | [Link] | To be confirmed |
+| Cymbalta (Duloxetine) | [Link] | To be confirmed |
+| Zoloft (Sertraline) | [Link] | To be confirmed |
+| Paxil (Paroxetine) | [Link] | To be confirmed |
 
-> Note: If a specific video isn't available, the general Outro Health webinar covers all SSRIs/SNRIs.
-
-> This educational content is for informational purposes only. It does not constitute medical advice, diagnosis, or treatment. Always consult your prescribing clinician before making any changes to your medication.
+*Note: If a specific video is not available, the general Outro Health webinar is recommended.*

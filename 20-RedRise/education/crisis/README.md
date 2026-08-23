@@ -1,17 +1,35 @@
-# Crisis Support – Help is Available
+# Crisis Support – Help Is Available
 
-- Emergency (South Africa): 112 (from any cell phone)
-- Ambulance (landline): 10177
+If you are in immediate danger, call **112** now.
+
+---
+
+## Emergency Numbers (South Africa)
+
+| Service | Number |
+| :--- | :--- |
+| **Emergency (any service, from cell phone)** | **112** |
+| Ambulance (landline) | 10177 |
+
+---
 
 ## Mental Health Helplines
 
-- [South African Depression and Anxiety Group (SADAG) - if they have a number]
-- [Other South African mental health resources]
+| Organisation | Number |
+| :--- | :--- |
+| South African Depression and Anxiety Group (SADAG) | 0800 21 22 23 |
+| SADAG Suicide Crisis Helpline | 0800 567 567 |
+| LifeLine South Africa | 0861 322 322 |
+
+---
 
 ## International Resources
 
-- [If you want to include]
+- [International Association for Suicide Prevention](https://www.iasp.info/resources/Crisis_Centres/)
+- [Find a Helpline](https://findahelpline.com/)
 
-> "If you are in immediate danger, call 112 now. You are not alone."
+---
 
-> This educational content is for informational purposes only. It does not constitute medical advice, diagnosis, or treatment. Always consult your prescribing clinician before making any changes to your medication.
+## You Are Not Alone
+
+Reaching out for help is a sign of strength. There are people who care and want to support you.

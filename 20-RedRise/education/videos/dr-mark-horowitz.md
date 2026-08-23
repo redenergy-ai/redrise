@@ -1,18 +1,29 @@
-# Dr. Mark Horowitz – The Science of Tapering
+# Dr. Mark Horowitz – Outro Health
 
-- Who he is: Psychiatrist, co-author of The Maudsley Deprescribing Guidelines
-- Link: https://www.youtube.com/@outrohealth
+**Dr. Mark Horowitz** is a psychiatrist and co‑author of *The Maudsley Deprescribing Guidelines*, the definitive clinical guide for safe tapering.
 
-## Key Topics
+---
 
-- Hyperbolic tapering
-- Withdrawal vs. relapse
-- The chemical imbalance myth
+## Full Channel
 
-- Key stat: Tapering success rate >90% if done slowly.
+**Link:** https://www.youtube.com/@outrohealth
+
+---
+
+## Key Topics Covered
+
+- Hyperbolic tapering – why slow is the only way
+- Withdrawal vs. relapse – how to tell the difference
+- The chemical imbalance myth – debunked
+
+---
+
+## Key Stat
+
+**Tapering off slowly and carefully has a success rate of over 90%.**
+
+---
 
 ## Why Watch This
 
-The definitive clinical guide for safe tapering.
-
-> This educational content is for informational purposes only. It does not constitute medical advice, diagnosis, or treatment. Always consult your prescribing clinician before making any changes to your medication.
+This is the definitive clinical guide for safe tapering.

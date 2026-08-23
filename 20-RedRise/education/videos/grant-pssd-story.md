@@ -1,11 +1,24 @@
-# Grant's PSSD Story
+# Grant's PSSD Story – Moral Medicine
 
-- Who: Grant, PSSD survivor
-- Link: https://www.youtube.com/@MoralMedicine
-- Focus: Post-SSRI sexual dysfunction, emotional numbness, recovery
+**Grant** shares his personal story of living with Post-SSRI Sexual Dysfunction (PSSD) after taking Lexapro.
+
+---
+
+## Full Channel
+
+**Link:** https://www.youtube.com/@MoralMedicine
+
+---
+
+## What He Covers
+
+- Emotional numbness
+- Loss of libido
+- The devastating impact on daily life
+- His journey toward recovery
+
+---
 
 ## Why Watch This
 
-Personal, relatable account of PSSD.
-
-> This educational content is for informational purposes only. It does not constitute medical advice, diagnosis, or treatment. Always consult your prescribing clinician before making any changes to your medication.
+A powerful, relatable first‑person account of PSSD.
